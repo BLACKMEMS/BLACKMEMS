@@ -1,4 +1,0 @@
-rm -rf docs
-mkdir docs
-chmod 755 docs
-
