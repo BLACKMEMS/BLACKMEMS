@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Расписание</title>
+  <style>
+    .schedule {
+      width: 600px;
+      margin: auto;
+    }
+
+    .header {
+      background: #ddd;
+      padding: 10px;
+    }
+
+    .selection {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #ddd;
+      padding: 5px;
+    }
+
+    th {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+<div class="schedule">
+  <div class="header">
+    <h1>Расписание учителя</h1>
+  </div>
+  <div class="selection">
+    <div>
+      <label>Семестр: </label>
+      <select id="semester">
+        <option value="1">1</option>
+        <option value="2">2</option>
+      </select>
+    </div>
+    <div>
+      <label>Год: </label>
+      <input type="number" id="year">
+    </div>
+    <button onclick="createSchedule()">Создать расписание</button>
+    <button onclick="saveSchedule()">Сохранить</button>
+    <button id="downloadButton">Скачать</button>
+  </div>
+  <div class="table" id="schedule"></div>
+</div>
+<script>
+  window.onload = function() {
+    let savedSchedule = localStorage.getItem('schedule');
+    if (savedSchedule) {
+      let schedule = document.querySelector('#schedule');
+      schedule.innerHTML = savedSchedule;
+    }
+  }
+
+  function createSchedule() {
+    let semester = document.querySelector('#semester').value;
+    let year = document.querySelector('#year').value;
+    let schedule = document.querySelector('#schedule');
+
+    schedule.innerHTML = ''; // Очистить
+
+    let table = document.createElement('table');
+    table.id = "myTable";
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+
+    let daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];
+
+    // Создание заголовка таблицы
+    let tr = document.createElement('tr');
+    let th = document.createElement('th');
+    th.textContent = 'День недели';
+    tr.appendChild(th);
+
+    let hours = prompt('Введите количество часов:', '6');
+    hours = parseInt(hours);
+
+    // Создание ячеек заголовка с указанием количества пар
+    for (let i = 1; i <= hours; i++) {
+      let th = document.createElement('th');
+      th.textContent = 'Пара ' + i;
+      tr.appendChild(th);
+    }
+
+    thead.appendChild(tr);
+    table.appendChild(thead);
+
+    // Создание расписания для каждого дня недели
+    for (let day of daysOfWeek) {
+      tr = document.createElement('tr');
+      let td = document.createElement('td');
+      td.textContent = day;
+      tr.appendChild(td);
+
+      for (let i = 1; i <= hours; i++) {
+        td = document.createElement('td');
+        if (i === 1) {
+          let inputSubject1 = document.createElement('input');
+          inputSubject1.type = 'text';
+          inputSubject1.placeholder = 'Введите предмет';
+          inputSubject1.id = day + '-subject-' + i;
+          td.appendChild(inputSubject1);
+        } else if (i === 2) {
+          let inputSubject2 = document.createElement('input');
+          inputSubject2.type = 'text';
+          inputSubject2.placeholder = 'Введите предмет';
+          inputSubject2.id = day + '-subject-' + i;
+          td.appendChild(inputSubject2);
+        }
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    schedule.appendChild(table);
+  }
+
+  function saveSchedule() {
+    let schedule = document.querySelector('#schedule').innerHTML;
+    localStorage.setItem('schedule', schedule);
+    alert('Расписание сохранено!');
+  }
+
+  document.getElementById("downloadButton").addEventListener("click", function() {
+    var table = document.getElementById("myTable");
+    var rows = table.rows;
+    var content = "";
+
+    // Проходим по каждой строке таблицы и получаем содержимое ячеек
+    for (var i = 0; i < rows.length; i++) {
+      var cells = rows[i].cells;
+      for (var j = 0; j < cells.length; j++) {
+        var cellContent = cells[j].querySelector('input') ? cells[j].querySelector('input').value : cells[j].innerText;
+        content += cellContent + "\t"; // Используйте "\n" вместо "\t" для разделения строк
+      }
+      content += "\n";
+    }
+
+    // Создаем объект Blob с содержимым таблицы
+    var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+
+    // Создаем ссылку для скачивания файла
+    var downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = "таблица.txt"; // Укажите имя файла
+
+    // Эмулируем клик по ссылке для скачивания файла
+    downloadLink.click();
+  });
+</script>
+
+</body>
+</html>
